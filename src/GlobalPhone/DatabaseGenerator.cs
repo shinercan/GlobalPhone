@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Text.RegularExpressions;
+using StringHash = System.Collections.Generic.IDictionary<string, string>;
 namespace GlobalPhone
 {
     public class DatabaseGenerator
@@ -130,8 +131,23 @@ namespace GlobalPhone
                 {"name",TerritoryName(node)},
                 {"possibleNumber",Pattern(node, "generalDesc possibleNumberPattern")},
                 {"nationalNumber",Pattern(node, "generalDesc nationalNumberPattern")},
-                {"formattingRule",Squish(node["nationalPrefixFormattingRule"])}
+                {"formattingRule",Squish(node["nationalPrefixFormattingRule"])},
+                {"possibleFormats",CompilePossibleFormats(node)}
             };
+        }
+
+        private IEnumerable<StringHash> CompilePossibleFormats(Nokogiri.Node node)
+        {
+            var possible = "fixedLine mobile voip tollFree premiumRate sharedCost uan personalNumber".Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);
+            return possible.Map(possibleFormat =>
+            {
+                return new Dictionary<string, string>
+                {
+                    {"possibleNumber",Pattern(node, possibleFormat+" possibleNumberPattern")},
+                    {"nationalNumber",Pattern(node, possibleFormat+" nationalNumberPattern")}
+                }.Reject(pattern => pattern.Value == null || Regex.IsMatch(pattern.Value, @"^NA$", RegexOptions.IgnoreCase))
+                .ToHash();
+            }).Reject(hash => !hash.Any());
         }
 
         private IEnumerable<IDictionary> CompileFormats(IEnumerable<Nokogiri.Node> territoryNodes)

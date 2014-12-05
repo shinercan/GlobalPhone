@@ -78,6 +78,31 @@ namespace GlobalPhone
         {
             return self.Select(map);
         }
+
+        internal static IEnumerable<TRet> Map<TRet>(this IDictionary self, Func<KeyValuePair<object, object>, TRet> map)
+        {
+            foreach (var key in self.Keys)
+            {
+                var value = self[key];
+                yield return map(new KeyValuePair<object,object>(key, value));
+            }
+        }
+
+        internal static IEnumerable<T> Reject<T>(this IEnumerable<T> self, Func<T,bool> reject)
+        {
+            return self.Where(elem => !reject(elem));
+        }
+
+        internal static IDictionary<TKey, TValue> ToHash<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> self) 
+        {
+            return self.ToDictionary(kv => kv.Key, kv => kv.Value);
+        }
+
+        internal static IDictionary<TKey, TValue> ToHash<T, TKey, TValue>(this IEnumerable<T> self, Func<T,TKey> key, Func<T,TValue> value)
+        {
+            return self.ToDictionary(e => key(e), e => value(e));
+        }
+
         /// <summary>
         /// Returns a new array that is a one-dimensional flattening of self (recursively).
         ///

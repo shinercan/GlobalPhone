@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace GlobalPhone
 {
@@ -119,5 +120,11 @@ namespace GlobalPhone
             }
 
         }
+
+        protected KeyValuePair<TKey, TValue> KeyValue<TKey, TValue>(TKey key, TValue value)
+        {
+            return new KeyValuePair<TKey, TValue>(key,value);
+        }
+
     }
 }

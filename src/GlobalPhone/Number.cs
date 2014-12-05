@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RegexKvp = System.Collections.Generic.KeyValuePair<string, System.Text.RegularExpressions.Regex>;
 
 namespace GlobalPhone
 {
@@ -26,7 +28,14 @@ namespace GlobalPhone
         {
             get { return Territory.NationalPattern; }
         }
-
+        public Regex PossiblePattern
+        {
+            get { return Territory.PossiblePattern; }
+        }
+        public IEnumerable<RegexKvp> ValidNumberFormats
+        {
+            get { return Territory.ValidNumberFormats; }
+        }
         public string NationalFormat
         {
             get
@@ -62,7 +71,32 @@ namespace GlobalPhone
 
         public bool IsValid
         {
-            get { return Format != null && NationalString.Match(NationalPattern).Success; }
+            get 
+            {
+                try
+                {
+                    return ((
+                        NationalString.Match(NationalPattern).Success
+                        || NationalString.Match(PossiblePattern).Success
+                        ) && MatchAnyValidPattern);
+                }
+                catch (MissingValidNumberFormatsException e)
+                {
+                    return Format != null && NationalString.Match(NationalPattern).Success; 
+                }
+            }
+        }
+
+        private bool MatchAnyValidPattern
+        {
+            get
+            {
+                if (ValidNumberFormats == null)
+                    throw new MissingValidNumberFormatsException();
+                return ValidNumberFormats.Any(format=>
+                    NationalString.Match(format.Value).Success
+                );
+            }
         }
 
         private Format Format
@@ -129,5 +163,17 @@ namespace GlobalPhone
         {
             return InternationalString;
         }
+    }
+
+    [Serializable]
+    public class MissingValidNumberFormatsException : Exception
+    {
+        public MissingValidNumberFormatsException() { }
+        public MissingValidNumberFormatsException(string message) : base(message) { }
+        public MissingValidNumberFormatsException(string message, Exception inner) : base(message, inner) { }
+        protected MissingValidNumberFormatsException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
     }
 }

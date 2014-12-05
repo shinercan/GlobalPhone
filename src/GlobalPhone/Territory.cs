@@ -1,23 +1,34 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using System.Linq;
+using Hash = System.Collections.Generic.IDictionary<string, object>;
+using RegexKvp = System.Collections.Generic.KeyValuePair<string, System.Text.RegularExpressions.Regex>;
 namespace GlobalPhone
 {
     public class Territory : Record
     {
         private readonly Region _region;
         public readonly string Name;
-        private readonly Regex _possiblePattern;
+        public readonly Regex PossiblePattern;
         public readonly Regex NationalPattern;
         public readonly string NationalPrefixFormattingRule;
-
+        public readonly IEnumerable<RegexKvp> ValidNumberFormats;
         public Territory(object data, Region region)
             : base(data)
         {
             _region = region;
             Name = Field<string>(0, column: "name");
-            _possiblePattern = Field<string, Regex>(1, column: "possibleNumber", block: p => new Regex("^" + p + "$"));
-            NationalPattern = Field<string, Regex>(2, column: "nationalNumber", block: p => new Regex("^" + p + "$"));
+            PossiblePattern = Field<string, Regex>(1, column: "possibleNumber", block: p => new Regex("^(" + p + ")$"));
+            NationalPattern = Field<string, Regex>(2, column: "nationalNumber", block: p => new Regex("^(" + p + ")$"));
             NationalPrefixFormattingRule = Field<string>(3, column: "formattingRule");
+            ValidNumberFormats = Field<object[], IEnumerable<RegexKvp>>(4, column: "possibleFormats", block:
+                formats => 
+                    formats.Map(format =>
+                        IsArray(format)
+                            ? AsArray(format).Map(f=>KeyValue("__",new Regex("^(" + f+ ")$")))
+                            : AsHash(format).Map(f =>
+                                KeyValue(f.Key.ToString(), new Regex("^(" + f.Value + ")$")))
+                    ).Flatten<RegexKvp>());
         }
 
         public string CountryCode
@@ -57,7 +68,11 @@ namespace GlobalPhone
 
         private bool Possible(string str)
         {
-            return str.Match(_possiblePattern).Success;
+            return str.Match(PossiblePattern).Success;
+        }
+        private bool NationalNumber(string str)
+        {
+            return str.Match(NationalPattern).Success;
         }
 
         protected string Normalize(string str)
@@ -67,7 +82,7 @@ namespace GlobalPhone
         protected string StripNationalPrefix(string str)
         {
             string stringWithoutPrefix = null;
-            if (NationalPrefixForParsing != null)
+            if (NationalPrefixForParsing != null && str.Match(NationalPrefixForParsing).Success)
             {
                 var transformRule = NationalPrefixTransformRule ?? "";
                 stringWithoutPrefix = str.Sub(NationalPrefixForParsing, transformRule);
@@ -76,7 +91,7 @@ namespace GlobalPhone
             {
                 stringWithoutPrefix = str.Substring(NationalPrefix.Length);
             }
-            return Possible(stringWithoutPrefix) ? stringWithoutPrefix : str;
+            return NationalNumber(stringWithoutPrefix) ? stringWithoutPrefix : str;
         }
         
         protected bool StartsWithNationalPrefix(string str)
