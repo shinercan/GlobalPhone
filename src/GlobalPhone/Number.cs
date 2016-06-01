@@ -59,7 +59,7 @@ namespace GlobalPhone
         {
             var prefix = NationalPrefixFormattingRule;
             Match match;
-            if (!string.IsNullOrEmpty(prefix) && (match = result.Match(SplitFirstGroup)).Success)
+            if (!string.IsNullOrEmpty(prefix) && (match = SplitFirstGroup.Match(result ?? String.Empty)).Success)
             {
                 prefix = prefix.Replace("$NP", NationalPrefix);
                 prefix = prefix.Replace("$FG", match.Groups[1].Value);
@@ -76,13 +76,13 @@ namespace GlobalPhone
                 try
                 {
                     return ((
-                        NationalString.Match(NationalPattern).Success
-                        || NationalString.Match(PossiblePattern).Success
+                        NationalPattern.Match(NationalString).Success
+                        || PossiblePattern.Match(NationalString).Success
                         ) && MatchAnyValidPattern);
                 }
                 catch (MissingValidNumberFormatsException e)
                 {
-                    return Format != null && NationalString.Match(NationalPattern).Success; 
+                    return Format != null && NationalPattern.Match(NationalString).Success; 
                 }
             }
         }
@@ -94,7 +94,7 @@ namespace GlobalPhone
                 if (ValidNumberFormats == null)
                     throw new MissingValidNumberFormatsException();
                 return ValidNumberFormats.Any(format=>
-                    NationalString.Match(format.Value).Success
+                    format.Value.Match(NationalString).Success
                 );
             }
         }
@@ -127,17 +127,15 @@ namespace GlobalPhone
 
         public string InternationalString
         {
-            get { return _internationalString ?? (_internationalString = InternationalFormat.Gsub(NonDialableChars, "")); }
+            get { return _internationalString ?? (_internationalString = NonDialableChars.Replace(InternationalFormat, "")); }
         }
 
         private Format FindFormatFor(string str)
         {
-            return Region.Formats.Detect(f => f.Match(str))
-            ?? Region.Formats.Detect(f => f.Match(str, false));
+            return Region.Formats.FirstOrDefault(f => f.Match(str))
+            ?? Region.Formats.FirstOrDefault(f => f.Match(str, false));
         }
 
-        private static readonly Dictionary<string, string> E161Mapping = "a2b2c2d3e3f3g4h4i4j5k5l5m6n6o6p7q7r7s7t8u8v8w9x9y9z9".SplitN(2).ToDictionary(kv => kv[0].ToString(CultureInfo.InvariantCulture), kv => kv[1].ToString(CultureInfo.InvariantCulture));
-        private static readonly Regex ValidAlphaChars = new Regex("[a-zA-Z]", RegexOptions.Compiled);
         private static readonly Regex LeadingPlusChars = new Regex("^\\++", RegexOptions.Compiled);
         private static readonly Regex NonDialableChars = new Regex("[^,#+\\*\\d]", RegexOptions.Compiled);
         private static readonly Regex SplitFirstGroup = new Regex("^(\\d+)\\W*(.*)$", RegexOptions.Compiled);
@@ -151,17 +149,45 @@ namespace GlobalPhone
             NationalString = nationalString;
         }
 
-        public static string Normalize(string str)
+        protected internal static string Normalize(string str)
         {
-            return
-                str.Gsub(ValidAlphaChars, match =>
-                    E161Mapping[match.Value.ToLower()])
-                    .Gsub(LeadingPlusChars, "+")
-                    .Gsub(NonDialableChars, "");
+            return (str ?? String.Empty)
+                    .Yield(s=>LeadingPlusChars.Replace(s, "+"))
+                    .Yield(s=>NonDialableChars.Replace(s, ""));
         }
         public override string ToString()
         {
             return InternationalString;
+        }
+        private static readonly Regex notSlashD = new Regex(@"[^\d]"); 
+        public string AreaCode
+        {
+            get
+            {
+                if (NationalPrefixFormattingRule != null)
+                {
+                    var areaCodeSuffix = SplitFirstGroup.Match(FormattedNationalString).Groups[1].Value;
+                    var formattedNationalPrefix = NationalPrefixFormattingRule.Replace("$NP", NationalPrefix).Replace("$FG", areaCodeSuffix);
+                    return notSlashD.Replace(formattedNationalPrefix, "");
+                }
+                return Format.FirstInPattern(NationalString);
+            }
+        }
+
+        private string FormattedNationalString
+        {
+            get
+            {
+                return Format.Apply(NationalString, "national");
+            }
+        }
+
+        public string LocalNumber
+        {
+            get
+            {
+                return AreaCode != null ? SplitFirstGroup.Match(FormattedNationalString).Groups[2].Value : NationalFormat;
+            }
         }
     }
 

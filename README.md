@@ -1,4 +1,6 @@
-# GlobalPhone [![Build Status](https://travis-ci.org/wallymathieu/GlobalPhone.png?branch=master)](https://travis-ci.org/wallymathieu/GlobalPhone) [![Build status](https://ci.appveyor.com/api/projects/status/4vvkw1h9l0okc6xj/branch/master?svg=true)](https://ci.appveyor.com/project/wallymathieu/globalphone/branch/master)
+Since there are many paid projects that require [my](github.com/wallymathieu) attention, I wont actively maintain the code. If someone would like to contribute I would be happy. If you need help with a non trivial change in the code please contact either the consultant firm I work for [tretton37](http://tretton37.com/contact/) or another consultant firm in order to do a pull request.
+
+# GlobalPhone [![Build Status](https://travis-ci.org/GlobalPhone/GlobalPhone.png?branch=master)](https://travis-ci.org/GlobalPhone/GlobalPhone) [![Build status](https://ci.appveyor.com/api/projects/status/q1g4004mt0bw9los/branch/master?svg=true)](https://ci.appveyor.com/project/wallymathieu/globalphone/branch/master)
 
 GlobalPhone parses, validates, and formats local and international phone numbers according to the [E.164 standard](http://en.wikipedia.org/wiki/E.164).
 
@@ -120,8 +122,9 @@ GlobalPhone.Normalize("(312) 555-1212");
 GlobalPhone.Normalize("+442070313000");
 # => "+442070313000"
 
-GlobalPhone.TryNormalize("(0) 20-7031-3000");
-# => null
+string normalized;
+GlobalPhone.TryNormalize("(0) 20-7031-3000", out normalized);
+# => false
 
 GlobalPhone.Normalize("(0) 20-7031-3000");
 # => #<GlobalPhone::FailedToParseNumberException>
@@ -139,11 +142,11 @@ Validation is not definitive and may return false positives, but *should not* re
 Territory heuristics are imprecise. Parsing a number will usually result in the territory being set to the primary territory of the region. For example, Canadian numbers will be parsed with a territory of `US`. (In most cases this does not matter, but if your application needs to perform geolocation using phone numbers, GlobalPhone may not be a good fit.)
 
 ## Development
-The GlobalPhone source code is [hosted on GitHub](https://github.com/wallymathieu/GlobalPhone). You can check out a copy of the latest code using Git:
+The GlobalPhone source code is [hosted on GitHub](https://github.com/GlobalPhone/GlobalPhone). You can check out a copy of the latest code using Git:
 
-    CMD> git clone https://github.com/wallymathieu/GlobalPhone.git
+    CMD> git clone https://github.com/GlobalPhone/GlobalPhone.git
 
-If you've found a bug or have a question, please open an issue on the [issue tracker](https://github.com/wallymathieu/GlobalPhone/issues). Or, clone the GlobalPhone repository, write a failing test case, fix the bug, and submit a pull request.
+If you've found a bug or have a question, please open an issue on the [issue tracker](https://github.com/GlobalPhone/GlobalPhone/issues). Or, clone the GlobalPhone repository, write a failing test case, fix the bug, and submit a pull request.
 
 GlobalPhone is a port of Sam Stephenson GlobalPhone for ruby [hosted on GitHub](https://github.com/sstephenson/global_phone).
 

@@ -22,11 +22,11 @@ namespace GlobalPhone
             NationalPattern = Field<string, Regex>(2, column: "nationalNumber", block: p => new Regex("^(" + p + ")$"));
             NationalPrefixFormattingRule = Field<string>(3, column: "formattingRule");
             ValidNumberFormats = Field<object[], IEnumerable<RegexKvp>>(4, column: "possibleFormats", block:
-                formats => 
-                    formats.Map(format =>
+                formats =>
+                    formats.Select(format =>
                         IsArray(format)
-                            ? AsArray(format).Map(f=>KeyValue("__",new Regex("^(" + f+ ")$")))
-                            : AsHash(format).Map(f =>
+                            ? AsArray(format).Select(f => KeyValue("__", new Regex("^(" + f + ")$")))
+                            : AsHash(format).Select(f =>
                                 KeyValue(f.Key.ToString(), new Regex("^(" + f.Value + ")$")))
                     ).Flatten<RegexKvp>());
         }
@@ -60,32 +60,39 @@ namespace GlobalPhone
 
         public Number ParseNationalString(string str)
         {
-            str = Normalize(str);
+            str = ToNationalNumber(str);
             if (Possible(str))
                 return new Number(this, str);
-            throw new FailedToParseNumberException("not possible for "+Name);
+            throw new FailedToParseNumberException("not possible for " + Name);
         }
 
         private bool Possible(string str)
         {
-            return str.Match(PossiblePattern).Success;
-        }
-        private bool NationalNumber(string str)
-        {
-            return str.Match(NationalPattern).Success;
+            return PossiblePattern.Match(str ?? string.Empty).Success;
         }
 
-        protected string Normalize(string str)
+        protected internal string Normalize(string str)
+        {
+            return Number.Normalize((E161.UsedBy(this)) ? E161.Normalize(str) : str);
+        }
+
+        protected string ToNationalNumber(string str)
         {
             return StripNationalPrefix(Number.Normalize(str));
         }
+
+        private bool NationalNumber(string str)
+        {
+            return NationalPattern.Match(str ?? string.Empty).Success;
+        }
+
         protected string StripNationalPrefix(string str)
         {
             string stringWithoutPrefix = null;
-            if (NationalPrefixForParsing != null && str.Match(NationalPrefixForParsing).Success)
+            if (NationalPrefixForParsing != null && NationalPrefixForParsing.Match(str).Success)
             {
                 var transformRule = NationalPrefixTransformRule ?? "";
-                stringWithoutPrefix = str.Sub(NationalPrefixForParsing, transformRule);
+                stringWithoutPrefix = NationalPrefixForParsing.Replace(str, transformRule, 1);
             }
             else if (StartsWithNationalPrefix(str))
             {
@@ -93,7 +100,7 @@ namespace GlobalPhone
             }
             return NationalNumber(stringWithoutPrefix) ? stringWithoutPrefix : str;
         }
-        
+
         protected bool StartsWithNationalPrefix(string str)
         {
             return NationalPrefix != null && str.StartsWith(NationalPrefix);
@@ -103,8 +110,8 @@ namespace GlobalPhone
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (Territory)) return false;
-            return Equals((Territory) obj);
+            if (obj.GetType() != typeof(Territory)) return false;
+            return Equals((Territory)obj);
         }
 
         public bool Equals(Territory other)

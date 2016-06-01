@@ -8,13 +8,14 @@ namespace GlobalPhone
     {
         public Number Parse(string str, string territoryName)
         {
-            str = Number.Normalize(str);
             var territory = TryGetTerritory(territoryName).Unless(new UnknownTerritoryException(territoryName));
+            str = territory.Normalize(str);
+
             if (StartsWithPlus(str))
             {
                 return ParseInternationalString(str);
             }
-            if (str.Match(territory.InternationalPrefix).Success)
+            if (territory.InternationalPrefix.Match(str ?? String.Empty).Success)
             {
                 str = StripInternationalPrefix(territory, str);
                 return ParseInternationalString(str);
@@ -24,7 +25,7 @@ namespace GlobalPhone
 
         private static string StripInternationalPrefix(Territory territory, string @string)
         {
-            return @string.Gsub(territory.InternationalPrefix, "");
+            return territory.InternationalPrefix.Replace(@string, "");
         }
 
         private Number ParseInternationalString(string @string)
@@ -44,7 +45,7 @@ namespace GlobalPhone
 
         private static IEnumerable<String> CountryCodeCandidatesFor(string @string)
         {
-            return new[] {1, 2, 3}.Map(i => @string.Length <= i ? null : @string.Substring(0, i))
+            return new[] {1, 2, 3}.Select(i => @string.Length <= i ? null : @string.Substring(0, i))
                 .Where(candidate => !String.IsNullOrEmpty(candidate));
         }
 
@@ -61,7 +62,7 @@ namespace GlobalPhone
         private Region RegionForString(string @string)
         {
             var candidates = CountryCodeCandidatesFor(@string);
-            return candidates.MapDetect(TryGetRegion);
+            return candidates.SelectWhereNotNull(TryGetRegion);
         }
 
         public abstract Region TryGetRegion(String countryCode);

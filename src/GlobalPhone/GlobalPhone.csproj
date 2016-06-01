@@ -10,7 +10,6 @@
     <AssemblyName>GlobalPhone</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <PackagesConfig>$(ProjectDir)/packages.config</PackagesConfig>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -40,12 +39,13 @@
   <ItemGroup>
     <Compile Include="Begin.cs" />
     <Compile Include="DatabaseGenerator.cs" />
+    <Compile Include="E161.cs" />
     <Compile Include="FailedToParseNumberException.cs" />
     <Compile Include="Format.cs" />
     <Compile Include="GlobalPhone.cs" />
+    <Compile Include="Nanp.cs" />
     <Compile Include="Nokogiri.cs" />
     <Compile Include="NokogiriExtensions.cs" />
-    <Compile Include="Rubyfy.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="NoDatabaseException.cs" />
@@ -56,9 +56,9 @@
     <Compile Include="Region.cs" />
     <Compile Include="Territory.cs" />
     <Compile Include="UnknownTerritoryException.cs" />
+    <Compile Include="InternalExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
