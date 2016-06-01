@@ -20,15 +20,15 @@ namespace GlobalPhone
         {
             get { return Territory.CountryCode; }
         }
-        public Region Region
+        internal Region Region
         {
             get { return Territory.Region; }
         }
-        public Regex NationalPattern
+        internal Regex NationalPattern
         {
             get { return Territory.NationalPattern; }
         }
-        public Regex PossiblePattern
+        internal Regex PossiblePattern
         {
             get { return Territory.PossiblePattern; }
         }

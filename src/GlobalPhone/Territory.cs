@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
-using Hash = System.Collections.Generic.IDictionary<string, object>;
 using RegexKvp = System.Collections.Generic.KeyValuePair<string, System.Text.RegularExpressions.Regex>;
 namespace GlobalPhone
 {
@@ -9,8 +8,8 @@ namespace GlobalPhone
     {
         private readonly Region _region;
         public readonly string Name;
-        public readonly Regex PossiblePattern;
-        public readonly Regex NationalPattern;
+        internal readonly Regex PossiblePattern;
+        internal readonly Regex NationalPattern;
         public readonly string NationalPrefixFormattingRule;
         public readonly IEnumerable<RegexKvp> ValidNumberFormats;
         public Territory(object data, Region region)
@@ -35,7 +34,7 @@ namespace GlobalPhone
         {
             get { return _region.CountryCode; }
         }
-        public Regex InternationalPrefix
+        internal Regex InternationalPrefix
         {
             get { return _region.InternationalPrefix; }
         }
@@ -43,7 +42,7 @@ namespace GlobalPhone
         {
             get { return _region.NationalPrefix; }
         }
-        public Regex NationalPrefixForParsing
+        internal Regex NationalPrefixForParsing
         {
             get { return _region.NationalPrefixForParsing; }
         }
