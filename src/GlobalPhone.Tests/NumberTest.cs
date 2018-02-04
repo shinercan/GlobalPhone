@@ -5,6 +5,7 @@ namespace GlobalPhone.Tests
     [TestFixture(typeof(NewtonsoftDeserializer), ForData.UseHashV2)]
     [TestFixture(typeof(DefaultDeserializer), ForData.UseHashV2)]
     [TestFixture(typeof(DefaultDeserializer), ForData.UseHashV3)]
+    [TestFixture(typeof(NewtonsoftDeserializer), ForData.UseHash2018_02_04)]
     public class NumberTest<Deserializer> : TestFixtureBase where Deserializer : IDeserializer, new()
     {
         public NumberTest(ForData forData)

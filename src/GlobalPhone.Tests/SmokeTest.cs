@@ -7,6 +7,7 @@ namespace GlobalPhone.Tests
     [TestFixture(typeof(DefaultDeserializer), ForData.UseHash)]
     [TestFixture(typeof(NewtonsoftDeserializer), ForData.UseHashV2)]
     [TestFixture(typeof(NewtonsoftDeserializer), ForData.UseHashV3)]
+    [TestFixture(typeof(NewtonsoftDeserializer), ForData.UseHash2018_02_04)]
     public class SmokeTest<Deserializer> : TestFixtureBase where Deserializer : IDeserializer, new()
     {
         public SmokeTest(ForData forData)

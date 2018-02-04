@@ -6,5 +6,6 @@
         UseHash = 1,
         UseHashV2 = 2,
         UseHashV3 = 3,
+        UseHash2018_02_04=4,
     }
 }
