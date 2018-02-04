@@ -2,8 +2,8 @@ version: 1.0.{build}
 image: Visual Studio 2017
 before_build:
   - cd src
-  - nuget restore GlobalPhone.Next.sln
+  - nuget restore GlobalPhone.sln
   - cd ..
 build:
-  project: src\GlobalPhone.Next.sln
+  project: src\GlobalPhone.sln
   verbosity: minimal
