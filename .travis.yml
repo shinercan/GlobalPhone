@@ -1,4 +1,7 @@
 language: csharp 
+mono: latest
+dotnet : 2.0.0
+sudo: false
 solution: ./src/GlobalPhone.sln
 install:
   - nuget restore ./src/GlobalPhone.sln
