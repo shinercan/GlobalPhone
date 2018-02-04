@@ -42,6 +42,8 @@ namespace GlobalPhone.Tests
                     return "record_data_hash_v2";
                 case ForData.UseHashV3:
                     return "record_data_hash_v3";
+                case ForData.UseHash2018_02_04:
+                    return "record_data_hash_2018_02_04";
                 default:
                     throw new Exception(_forData.ToString());
             }
@@ -61,6 +63,8 @@ namespace GlobalPhone.Tests
                 case ForData.None:// use latest
                 case ForData.UseHashV2:
                 case ForData.UseHashV3:
+                    return "example_numbers_v2";
+                case ForData.UseHash2018_02_04:
                     return "example_numbers_v2";
                 default:
                     throw new Exception(_forData.ToString());
